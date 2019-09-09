@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+
+<body>
+    <h1>Welcome to Your Account {{ user_first_name }} </h1>
+
+    <form action="/logout">
+        <input class="btn btn-danger" type="submit" name="logout" value="Logout">
+    </form>
+
+    <form class="was-validated" method="POST" action="/create_post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="validationTextarea">Post:</label>
+            <textarea name="post_content" class="form-control is-invalid" id="validationTextarea"
+                placeholder="The post must be atleast 50 characters." required></textarea>
+            <!-- <div class="invalid-feedback">
+                The post must be atleast 50 characters.
+            </div> -->
+            <input type="submit" name="create" value="Create Post" class="btn btn-primary">
+        </div>
+    </form>
+
+    {% for post in all_posts %}
+    <h3>{{ post.post_content }}</h3>
+    <h5> - {{ post.user.first_name }}</h5>
+
+    {% if post.user_id == current_user.id %}
+    <form action="/delete_post" method="POST" style="display: inline-block">
+        {% csrf_token %}
+        <button type="submit" class="btn-sm btn-danger">Delete Post</button>
+        <input type="hidden" name="post_id" value="{{ post.id }}">
+    </form>
+    {% endif %}
+
+    {% for comment in post.comments.all %}
+    <div class="comment">
+        <p style="color: blueviolet; display: inline-block">
+            {{ comment.comment_content }} - {{ comment.user.first_name }}
+        </p>
+
+        {% if current_user_id == comment.user.id %}
+        <form action="/delete_comment/{{ comment.id }}" method="POST" style="display:inline-block">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    <div class="form-group comment-box">
+        <form action="/add_comment/{{ post.id }}" method="POST">
+            {% csrf_token %}
+            <input type="text" class="form-control" aria-describedby="emailHelp" placeholder="Comment"
+                name="comment-text">
+            <input type="submit" name="comment-btn" value="Comment" class="btn btn-success">
+        </form>
+    </div>
+    {% endfor %}
+
+
+</body>
+
+</html>
